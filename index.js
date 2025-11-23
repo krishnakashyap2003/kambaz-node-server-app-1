@@ -13,6 +13,7 @@ const app = express();
 
 app.use(express.json());
 
+// CORS — ONE BLOCK ONLY
 app.use(
   cors({
     origin: [
@@ -20,21 +21,24 @@ app.use(
       "https://kambaz-next-js-md72.vercel.app"
     ],
     credentials: true,
+    methods: "GET,POST,PUT,DELETE,OPTIONS"
   })
 );
 
+// SESSION — FIXED
 app.use(
   session({
     secret: "kambaz",
     resave: false,
     saveUninitialized: false,
     cookie: {
-       secure: false,
-      sameSite: "lax",  
-    },
+      secure: process.env.SERVER_ENV === "production",  
+      sameSite: process.env.SERVER_ENV === "production" ? "none" : "lax"
+    }
   })
 );
 
+// ROUTES
 UserRoutes(app);
 CourseRoutes(app);
 ModuleRoutes(app);
