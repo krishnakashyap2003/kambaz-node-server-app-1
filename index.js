@@ -19,19 +19,14 @@ const allowedOrigins = [
   "https://kambaz-next-js-md72.vercel.app",
 ];
 
+app.use(express.json());
+
 app.use(
   cors({
+    origin: allowedOrigins,
     credentials: true,
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
   })
 );
-
 
 
 console.log("CORS configured");
