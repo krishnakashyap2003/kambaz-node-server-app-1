@@ -21,12 +21,12 @@ const allowedOrigins = [
   process.env.CLIENT_URL, // Single URL (backward compatibility)
   process.env.CLIENT_URL1, // Additional client URL
   ...envClientUrls, // Multiple URLs from CLIENT_URLS
+  "https://kambaz-next-js-bjvf.vercel.app", // Production Vercel URL
   "https://kambaz-next-js-bjvf-nz01e6dxo.vercel.app",
   "https://kambaz-next-js-bjvf-git-main-krishna-kashyaps-projects-80a2e86c.vercel.app",
   "http://localhost:3000", 
 ].filter(Boolean);
 
-// Normalize origins (remove trailing slashes and convert to lowercase for comparison)
 const normalizedOrigins = allowedOrigins.map(url => url.replace(/\/$/, '').toLowerCase());
 
 console.log("=== CORS Configuration ===");
@@ -37,7 +37,6 @@ app.use(
   cors({
     credentials: true,
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
       if (!origin) {
         console.log("Request with no origin - allowing");
         return callback(null, true);
@@ -46,16 +45,26 @@ app.use(
       // Normalize the incoming origin
       const normalizedOrigin = origin.replace(/\/$/, '').toLowerCase();
       
-      // Check if origin is allowed
+      // Check if origin is in the allowed list
       if (normalizedOrigins.includes(normalizedOrigin)) {
         console.log(`✅ CORS allowed: ${origin}`);
         callback(null, true);
-      } else {
-        console.warn(`❌ CORS blocked origin: ${origin}`);
-        console.warn(`   Normalized: ${normalizedOrigin}`);
-        console.warn(`   Allowed origins:`, normalizedOrigins);
-        callback(new Error('Not allowed by CORS'));
+        return;
       }
+      
+      // Also allow any Vercel preview deployment for this project
+      // This handles: *.vercel.app domains for kambaz-next-js
+      if (normalizedOrigin.includes('kambaz-next-js') && normalizedOrigin.includes('.vercel.app')) {
+        console.log(`✅ CORS allowed (Vercel preview): ${origin}`);
+        callback(null, true);
+        return;
+      }
+      
+      // Block if not allowed
+      console.warn(`❌ CORS blocked origin: ${origin}`);
+      console.warn(`   Normalized: ${normalizedOrigin}`);
+      console.warn(`   Allowed origins:`, normalizedOrigins);
+      callback(new Error('Not allowed by CORS'));
     },
   })
 );
