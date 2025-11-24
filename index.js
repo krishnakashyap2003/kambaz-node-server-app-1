@@ -26,16 +26,34 @@ const allowedOrigins = [
   "http://localhost:3000", 
 ].filter(Boolean);
 
+// Normalize origins (remove trailing slashes and convert to lowercase for comparison)
+const normalizedOrigins = allowedOrigins.map(url => url.replace(/\/$/, '').toLowerCase());
+
+console.log("=== CORS Configuration ===");
+console.log("Allowed origins:", normalizedOrigins);
+console.log("========================");
+
 app.use(
   cors({
     credentials: true,
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+      // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
+      if (!origin) {
+        console.log("Request with no origin - allowing");
+        return callback(null, true);
+      }
       
-      if (allowedOrigins.includes(origin)) {
+      // Normalize the incoming origin
+      const normalizedOrigin = origin.replace(/\/$/, '').toLowerCase();
+      
+      // Check if origin is allowed
+      if (normalizedOrigins.includes(normalizedOrigin)) {
+        console.log(`✅ CORS allowed: ${origin}`);
         callback(null, true);
       } else {
-        console.warn(`CORS blocked origin: ${origin}`);
+        console.warn(`❌ CORS blocked origin: ${origin}`);
+        console.warn(`   Normalized: ${normalizedOrigin}`);
+        console.warn(`   Allowed origins:`, normalizedOrigins);
         callback(new Error('Not allowed by CORS'));
       }
     },
@@ -47,6 +65,7 @@ const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
+  name: "kambaz.session",
 };
 
 if (process.env.SERVER_ENV !== "development") {
@@ -54,6 +73,14 @@ if (process.env.SERVER_ENV !== "development") {
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    // Don't set domain - let browser handle it for cross-origin
+  };
+} else {
+  sessionOptions.cookie = {
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
   };
 }
 
