@@ -27,6 +27,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL, // Single URL (backward compatibility)
   process.env.CLIENT_URL1, // Additional client URL
   ...envClientUrls, // Multiple URLs from CLIENT_URLS
+  "https://kambaz-next-js-weld.vercel.app", // Your Vercel frontend URL
   "https://kambaz-next-js-bjvf.vercel.app", // Production Vercel URL
   "https://kambaz-next-js-bjvf-nz01e6dxo.vercel.app",
   "https://kambaz-next-js-bjvf-git-main-krishna-kashyaps-projects-80a2e86c.vercel.app",
