@@ -5,8 +5,8 @@ export default function EnrollmentRoutes(app) {
   app.get("/api/users/:userId/enrollments", async (req, res) => {
     const { userId } = req.params;
     try {
-      const enrollments = await enrollmentsDao.findEnrollmentsForUser(userId);
-      res.json(enrollments);
+      const courses = await enrollmentsDao.findCoursesForUser(userId);
+      res.json(courses);
     } catch (error) {
       console.error("Error fetching enrollments:", error);
       res.status(500).json({ message: "Error fetching enrollments" });
@@ -17,8 +17,8 @@ export default function EnrollmentRoutes(app) {
   app.get("/api/enrollments/course/:courseId", async (req, res) => {
     const { courseId } = req.params;
     try {
-      const enrollments = await enrollmentsDao.findEnrollmentsForCourse(courseId);
-      res.json(enrollments);
+      const users = await enrollmentsDao.findUsersForCourse(courseId);
+      res.json(users);
     } catch (error) {
       console.error("Error fetching course enrollments:", error);
       res.status(500).json({ message: "Error fetching course enrollments" });
@@ -41,8 +41,8 @@ export default function EnrollmentRoutes(app) {
   app.delete("/api/enrollments/user/:userId/course/:courseId", async (req, res) => {
     const { userId, courseId } = req.params;
     try {
-      await enrollmentsDao.unenrollUserFromCourse(userId, courseId);
-      res.sendStatus(204);
+      const status = await enrollmentsDao.unenrollUserFromCourse(userId, courseId);
+      res.send(status);
     } catch (error) {
       console.error("Error unenrolling user:", error);
       res.status(500).json({ message: "Error unenrolling user" });

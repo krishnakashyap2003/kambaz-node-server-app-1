@@ -1,39 +1,30 @@
-import Database from "../Database/index.js";
+import model from "./model.js";
 
-export function findEnrollmentsForUser(userId) {
-  const { enrollments } = Database;
-  return enrollments.filter((enrollment) => enrollment.user === userId);
+export async function findCoursesForUser(userId) {
+  const enrollments = await model.find({ user: userId }).populate("course");
+  return enrollments
+    .map((enrollment) => enrollment.course)
+    .filter((course) => course !== null && course !== undefined);
 }
 
-export function findEnrollmentsForCourse(courseId) {
-  const { enrollments } = Database;
-  return enrollments.filter((enrollment) => enrollment.course === courseId);
+export async function findUsersForCourse(courseId) {
+  const enrollments = await model.find({ course: courseId }).populate("user");
+  return enrollments
+    .map((enrollment) => enrollment.user)
+    .filter((user) => user !== null && user !== undefined);
 }
 
-export function enrollUserInCourse(userId, courseId) {
-  const { enrollments } = Database;
-    const existing = enrollments.find(
-    (e) => e.user === userId && e.course === courseId
-  );
+export async function enrollUserInCourse(user, course) {
+  const enrollmentId = `${user}-${course}`;
+  // Check if enrollment already exists
+  const existing = await model.findById(enrollmentId);
   if (existing) {
-    return existing;
+    return existing; // Return existing enrollment if already enrolled
   }
-
-  const enrollment = {
-    _id: Date.now().toString(),
-    user: userId,
-    course: courseId,
-  };
-  enrollments.push(enrollment);
-  return enrollment;
+  const newEnrollment = { user, course, _id: enrollmentId };
+  return model.create(newEnrollment);
 }
 
-export function unenrollUserFromCourse(userId, courseId) {
-  const { enrollments } = Database;
-  const index = enrollments.findIndex(
-    (e) => e.user === userId && e.course === courseId
-  );
-  if (index !== -1) {
-    enrollments.splice(index, 1);
-  }
+export function unenrollUserFromCourse(user, course) {
+  return model.deleteOne({ user, course });
 }

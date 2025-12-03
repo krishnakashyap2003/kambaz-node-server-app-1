@@ -2,12 +2,18 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import mongoose from "mongoose";
 import Lab5 from "./Lab5/index.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 import ModuleRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
+
+const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
+mongoose.connect(CONNECTION_STRING)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 const app = express();
 
@@ -70,6 +76,10 @@ app.use(
 );
 
 // Session configuration
+const isDevelopment = process.env.SERVER_ENV === "development" || 
+                      process.env.NODE_ENV === "development" ||
+                      !process.env.SERVER_ENV; // Default to development if not set
+
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
@@ -77,7 +87,8 @@ const sessionOptions = {
   name: "kambaz.session",
 };
 
-if (process.env.SERVER_ENV !== "development") {
+if (!isDevelopment) {
+  // Production mode
   sessionOptions.proxy = true;
   sessionOptions.cookie = {
     sameSite: "none",
@@ -87,11 +98,19 @@ if (process.env.SERVER_ENV !== "development") {
     // Don't set domain - let browser handle it for cross-origin
   };
 } else {
+  // Development mode - allow cookies on localhost (HTTP)
   sessionOptions.cookie = {
     httpOnly: true,
+    secure: false, // false for localhost (http)
+    sameSite: "lax", // lax allows cookies to be sent on same-site requests
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   };
 }
+
+console.log("Session configuration:", {
+  isDevelopment,
+  cookie: sessionOptions.cookie
+});
 
 app.use(session(sessionOptions));
 app.use(express.json());
