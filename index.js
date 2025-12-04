@@ -24,14 +24,14 @@ const envClientUrls = process.env.CLIENT_URLS
   : [];
 
 const allowedOrigins = [
-  process.env.CLIENT_URL, // Single URL (backward compatibility)
-  process.env.CLIENT_URL1, // Additional client URL
-  ...envClientUrls, // Multiple URLs from CLIENT_URLS
-  "https://kambaz-next-js-weld.vercel.app", // Your Vercel frontend URL
-  "https://kambaz-next-js-bjvf.vercel.app", // Production Vercel URL
+  "http://localhost:3000",
+  "https://kambaz-next-js-md72.vercel.app",
+  "https://kambaz-next-js-md72-git-main-mohana-harshitas-projects.vercel.app",
+  "https://kambaz-next-js-md72-e8s7aqkwc-mohana-harshitas-projects.vercel.app",
+  "https://kambaz-next-js-weld.vercel.app",
+  "https://kambaz-next-js-bjvf.vercel.app",
   "https://kambaz-next-js-bjvf-nz01e6dxo.vercel.app",
-  "https://kambaz-next-js-bjvf-git-main-krishna-kashyaps-projects-80a2e86c.vercel.app",
-  "http://localhost:3000", 
+  "https://kambaz-next-js-bjvf-git-main-krishna-kashyaps-projects-80a2e86c.vercel.app"
 ].filter(Boolean);
 
 const normalizedOrigins = allowedOrigins.map(url => url.replace(/\/$/, '').toLowerCase());
