@@ -44,10 +44,21 @@ export default function UserRoutes(app) {
   const updateUser = async (req, res) => {
     try {
       const { userId } = req.params;
+      console.log("PUT /api/users/:userId - Received request for userId:", userId);
+      console.log("Request body:", req.body);
+      
+      if (!userId) {
+        res.status(400).json({ message: "User ID is required" });
+        return;
+      }
+      
       const userUpdates = req.body;
-      await dao.updateUser(userId, userUpdates);
+      const updateResult = await dao.updateUser(userId, userUpdates);
+      console.log("Update result:", updateResult);
+      
       const updatedUser = await dao.findUserById(userId);
       if (!updatedUser) {
+        console.log("User not found after update:", userId);
         res.status(404).json({ message: "User not found" });
         return;
       }
@@ -56,8 +67,10 @@ export default function UserRoutes(app) {
       if (currentUser && currentUser._id === userId) {
         req.session["currentUser"] = userObj;
       }
+      console.log("User updated successfully:", userId);
       res.json(userObj);
     } catch (error) {
+      console.error("Error updating user:", error);
       res.status(500).json({ message: error.message });
     }
   };
@@ -163,18 +176,26 @@ export default function UserRoutes(app) {
     }
   };
 
-  // Routes
+  // Routes - Order matters! More specific routes must come before parameterized ones
+  // Authentication routes
   app.post("/api/users/signup", signup);
   app.post("/api/users/signin", signin);
   app.post("/api/users/signout", signout);
   app.post("/api/users/profile", profile);
-  app.put("/api/users/:userId", updateUser);
-  app.get("/api/users", findAllUsers);
-  app.get("/api/users/:userId", findUserById);
-  app.delete("/api/users/:userId", deleteUser);
-  app.post("/api/users", createUser);
+  
+  // Specific routes (must come before parameterized routes)
+  app.post("/api/users/current/courses", createCourse);
   app.get("/api/users/:uid/courses", findCoursesForUser);
   app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
   app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
-  app.post("/api/users/current/courses", createCourse);
+  
+  // CRUD routes for users
+  app.get("/api/users", findAllUsers);
+  app.post("/api/users", createUser);
+  app.put("/api/users/:userId", updateUser);
+  app.get("/api/users/:userId", findUserById);
+  app.delete("/api/users/:userId", deleteUser);
+  
+  console.log("✅ User routes registered successfully");
+  console.log("   PUT /api/users/:userId route is registered");
 }

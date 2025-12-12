@@ -129,6 +129,19 @@ AssignmentRoutes(app);
 EnrollmentRoutes(app);
 Lab5(app);
 
+// Catch-all route handler for debugging 404 errors
+app.use((req, res, next) => {
+  console.log(`⚠️  Unmatched route: ${req.method} ${req.originalUrl}`);
+  console.log(`   Path: ${req.path}`);
+  console.log(`   Params:`, req.params);
+  res.status(404).json({ 
+    message: "Route not found", 
+    method: req.method,
+    path: req.path,
+    originalUrl: req.originalUrl
+  });
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
