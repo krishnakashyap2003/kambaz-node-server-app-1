@@ -54,13 +54,23 @@ export default function CourseRoutes(app) {
 
   // Create module for course
   const createModuleForCourse = async (req, res) => {
-    const { courseId } = req.params;
-    const module = {
-      ...req.body,
-      course: courseId,
-    };
-    const newModule = await modulesDao.createModule(module);
-    res.json(newModule);
+    try {
+      const { courseId } = req.params;
+      const module = {
+        ...req.body,
+        course: courseId,
+      };
+      const newModule = await modulesDao.createModule(module);
+      // Convert Mongoose document to plain object
+      const moduleObj = newModule.toObject ? newModule.toObject() : newModule;
+      res.json(moduleObj);
+    } catch (error) {
+      console.error("Error creating module:", error);
+      res.status(500).json({ 
+        message: "Error creating module", 
+        error: error.message 
+      });
+    }
   };
 
   // Find assignments for course

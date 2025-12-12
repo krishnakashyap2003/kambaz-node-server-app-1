@@ -6,7 +6,12 @@ export function findModulesForCourse(courseId) {
 }
 
 export function createModule(module) {
-  const newModule = { ...module, _id: uuidv4() };
+  // If _id is provided, use it (allows string IDs like "M101")
+  // Otherwise, generate a UUID
+  const newModule = { 
+    ...module, 
+    _id: module._id || uuidv4() 
+  };
   return model.create(newModule);
 }
 
