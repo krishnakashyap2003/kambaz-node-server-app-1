@@ -14,9 +14,27 @@ export default function UserRoutes(app) {
   };
 
   const deleteUser = async (req, res) => {
-    const { userId } = req.params;
-    const status = await dao.deleteUser(userId);
-    res.json(status);
+    let { userId } = req.params;
+    console.log("DELETE /api/users/:userId - Received request");
+    console.log("   userId param:", userId);
+    console.log("   Request path:", req.path);
+    
+    if (!userId) {
+      res.status(400).json({ message: "User ID is required" });
+      return;
+    }
+    
+    // Ensure userId is a string
+    userId = String(userId);
+    
+    try {
+      const status = await dao.deleteUser(userId);
+      console.log("   ✅ User deleted successfully:", userId);
+      res.json(status);
+    } catch (error) {
+      console.error("   ❌ Error deleting user:", error);
+      res.status(500).json({ message: error.message });
+    }
   };
 
   const findAllUsers = async (req, res) => {
@@ -43,22 +61,31 @@ export default function UserRoutes(app) {
 
   const updateUser = async (req, res) => {
     try {
-      const { userId } = req.params;
-      console.log("PUT /api/users/:userId - Received request for userId:", userId);
-      console.log("Request body:", req.body);
+      // Express automatically decodes URL-encoded parameters
+      let { userId } = req.params;
+      console.log("PUT /api/users/:userId - Received request");
+      console.log("   Raw userId param:", userId);
+      console.log("   Request path:", req.path);
+      console.log("   Request originalUrl:", req.originalUrl);
+      console.log("   Request method:", req.method);
+      console.log("   Request body:", req.body);
       
       if (!userId) {
         res.status(400).json({ message: "User ID is required" });
         return;
       }
       
+      // Ensure userId is a string (in case it was parsed incorrectly)
+      userId = String(userId);
+      
       const userUpdates = req.body;
+      console.log("   Attempting to update user with ID:", userId);
       const updateResult = await dao.updateUser(userId, userUpdates);
-      console.log("Update result:", updateResult);
+      console.log("   Update result:", updateResult);
       
       const updatedUser = await dao.findUserById(userId);
       if (!updatedUser) {
-        console.log("User not found after update:", userId);
+        console.log("   ❌ User not found after update:", userId);
         res.status(404).json({ message: "User not found" });
         return;
       }
@@ -67,10 +94,11 @@ export default function UserRoutes(app) {
       if (currentUser && currentUser._id === userId) {
         req.session["currentUser"] = userObj;
       }
-      console.log("User updated successfully:", userId);
+      console.log("   ✅ User updated successfully:", userId);
       res.json(userObj);
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("   ❌ Error updating user:", error);
+      console.error("   Error stack:", error.stack);
       res.status(500).json({ message: error.message });
     }
   };
