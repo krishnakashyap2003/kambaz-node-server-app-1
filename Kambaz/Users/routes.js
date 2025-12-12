@@ -189,13 +189,32 @@ export default function UserRoutes(app) {
   app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
   app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
   
-  // CRUD routes for users
+  // CRUD routes for users - PUT must come before GET with same pattern
   app.get("/api/users", findAllUsers);
   app.post("/api/users", createUser);
-  app.put("/api/users/:userId", updateUser);
+  // PUT route for updating users - register explicitly
+  app.put("/api/users/:userId", (req, res, next) => {
+    console.log("🔵 PUT /api/users/:userId route matched!");
+    console.log("   userId param:", req.params.userId);
+    next();
+  }, updateUser);
   app.get("/api/users/:userId", findUserById);
   app.delete("/api/users/:userId", deleteUser);
   
   console.log("✅ User routes registered successfully");
   console.log("   PUT /api/users/:userId route is registered");
+  console.log("   All registered routes:");
+  console.log("     POST /api/users/signup");
+  console.log("     POST /api/users/signin");
+  console.log("     POST /api/users/signout");
+  console.log("     POST /api/users/profile");
+  console.log("     POST /api/users/current/courses");
+  console.log("     GET  /api/users/:uid/courses");
+  console.log("     POST /api/users/:uid/courses/:cid");
+  console.log("     DELETE /api/users/:uid/courses/:cid");
+  console.log("     GET  /api/users");
+  console.log("     POST /api/users");
+  console.log("     PUT  /api/users/:userId");
+  console.log("     GET  /api/users/:userId");
+  console.log("     DELETE /api/users/:userId");
 }

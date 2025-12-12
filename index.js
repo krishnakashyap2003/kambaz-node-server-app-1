@@ -116,6 +116,16 @@ console.log("Session configuration:", {
 app.use(session(sessionOptions));
 app.use(express.json());
 
+// Request logging middleware - log all incoming requests
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/users')) {
+    console.log(`📥 Incoming request: ${req.method} ${req.path}`);
+    console.log(`   Original URL: ${req.originalUrl}`);
+    console.log(`   Query:`, req.query);
+  }
+  next();
+});
+
 // ROOT ROUTE - ADD THIS
 app.get("/", (req, res) => {
   res.send("Welcome to Full Stack Development!");
