@@ -1,6 +1,6 @@
 export default function Hello(app) { 
   const sayHello = (req, res) => { 
-    res.send("Life is good!"); 
+    res.send("lLife is Good!"); 
   }; 
   const sayWelcome = (req, res) => { 
     res.send("Welcome to Full Stack Development!"); 
