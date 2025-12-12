@@ -196,11 +196,27 @@ export default function UserRoutes(app) {
     }
     try {
       const newCourse = await courseDao.createCourse(req.body);
-      await enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
-      res.json(newCourse);
+      
+      // Convert Mongoose document to plain object
+      const courseObj = newCourse.toObject ? newCourse.toObject() : newCourse;
+      
+      // Ensure both IDs are strings
+      const userId = String(currentUser._id);
+      const courseId = String(courseObj._id);
+      
+      if (!userId || !courseId) {
+        throw new Error(`Invalid IDs: userId=${userId}, courseId=${courseId}`);
+      }
+      
+      await enrollmentsDao.enrollUserInCourse(userId, courseId);
+      res.json(courseObj);
     } catch (error) {
       console.error("Error creating course:", error);
-      res.status(500).json({ message: "Error creating course", error: error.message });
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ 
+        message: "Error creating course", 
+        error: error.message 
+      });
     }
   };
 
