@@ -177,29 +177,36 @@ export default function UserRoutes(app) {
   };
 
   // Routes - Order matters! More specific routes must come before parameterized ones
-  // Authentication routes
+  // Authentication routes (exact paths)
   app.post("/api/users/signup", signup);
   app.post("/api/users/signin", signin);
   app.post("/api/users/signout", signout);
   app.post("/api/users/profile", profile);
   
-  // Specific routes (must come before parameterized routes)
-  app.post("/api/users/current/courses", createCourse);
-  app.get("/api/users/:uid/courses", findCoursesForUser);
-  app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
-  app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
-  
-  // CRUD routes for users - PUT must come before GET with same pattern
+  // Collection routes (no parameters)
   app.get("/api/users", findAllUsers);
   app.post("/api/users", createUser);
-  // PUT route for updating users - register explicitly
+  
+  // Specific nested routes (must come before single parameter routes)
+  app.post("/api/users/current/courses", createCourse);
+  
+  // PUT route for updating users - MUST come before other :userId/:uid routes
   app.put("/api/users/:userId", (req, res, next) => {
     console.log("🔵 PUT /api/users/:userId route matched!");
     console.log("   userId param:", req.params.userId);
+    console.log("   Request path:", req.path);
+    console.log("   Request method:", req.method);
     next();
   }, updateUser);
+  
+  // Other single parameter routes
   app.get("/api/users/:userId", findUserById);
   app.delete("/api/users/:userId", deleteUser);
+  
+  // Nested routes with two parameters (must come last)
+  app.get("/api/users/:uid/courses", findCoursesForUser);
+  app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
+  app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
   
   console.log("✅ User routes registered successfully");
   console.log("   PUT /api/users/:userId route is registered");
