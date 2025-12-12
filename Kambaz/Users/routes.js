@@ -195,27 +195,40 @@ export default function UserRoutes(app) {
       return;
     }
     try {
+      console.log("📚 Step 1: Creating course with body:", JSON.stringify(req.body));
       const newCourse = await courseDao.createCourse(req.body);
+      console.log("📚 Step 2: Course created, _id:", newCourse._id);
       
       // Convert Mongoose document to plain object
       const courseObj = newCourse.toObject ? newCourse.toObject() : newCourse;
+      console.log("📚 Step 3: Course converted to object, _id:", courseObj._id);
       
       // Ensure both IDs are strings
       const userId = String(currentUser._id);
       const courseId = String(courseObj._id);
+      console.log("📚 Step 4: IDs prepared - userId:", userId, "courseId:", courseId);
       
-      if (!userId || !courseId) {
+      if (!userId || userId === "undefined" || !courseId || courseId === "undefined") {
         throw new Error(`Invalid IDs: userId=${userId}, courseId=${courseId}`);
       }
       
+      console.log("📚 Step 5: Attempting enrollment...");
       await enrollmentsDao.enrollUserInCourse(userId, courseId);
+      console.log("📚 Step 6: Enrollment successful, returning course");
+      
       res.json(courseObj);
     } catch (error) {
-      console.error("Error creating course:", error);
-      console.error("Error stack:", error.stack);
+      console.error("❌ Error creating course - Full details:");
+      console.error("   Error message:", error.message);
+      console.error("   Error name:", error.name);
+      console.error("   Error stack:", error.stack);
+      if (error.errors) {
+        console.error("   Mongoose validation errors:", JSON.stringify(error.errors, null, 2));
+      }
       res.status(500).json({ 
         message: "Error creating course", 
-        error: error.message 
+        error: error.message,
+        step: error.step || "unknown"
       });
     }
   };

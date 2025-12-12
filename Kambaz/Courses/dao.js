@@ -6,7 +6,13 @@ export function findAllCourses() {
 }
 
 export function createCourse(course) {
-  const newCourse = { ...course, _id: uuidv4() };
+  const courseId = uuidv4();
+  const newCourse = { 
+    ...course, 
+    _id: courseId,
+    // If number is not provided, generate one from the course ID to avoid unique constraint violation
+    number: course.number || `COURSE-${courseId.substring(0, 8).toUpperCase()}`
+  };
   return model.create(newCourse);
 }
 
